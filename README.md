@@ -10,11 +10,11 @@
 
 Синхронизация стоит раз в час, отключить можно используя ключ `SCHEDULER_ENABLED`
 
-Разделить дробей можно указать в env, так же как и поле сортировки:
+Разделитель дробей можно указать в env, так же как и поле сортировки:
 
-EXPORT_DECIMAL_SEPARATOR=","
-EXPORT_SORTING_COLUMN="boxDeliveryCoefExpr"
-EXPORT_SORTING_ASC=1
+`EXPORT_DECIMAL_SEPARATOR=","`
+`EXPORT_SORTING_COLUMN="boxDeliveryCoefExpr"`
+`EXPORT_SORTING_ASC=1`
 
 По умолчанию: boxDeliveryCoefExpr по возрастанию, запятая для десятичных дробей.
 
