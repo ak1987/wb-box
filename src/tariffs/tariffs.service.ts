@@ -97,24 +97,7 @@ export class TariffsService {
     };
   }
 
-  async createTariffDate(tariffDate: TariffDate): Promise<TariffDate> {
-    const [result] = await this.knex('tariff_dates').insert(tariffDate).returning('*');
-    return result;
-  }
-
-  async updateTariffDate(date: string, tariffDate: Partial<TariffDate>): Promise<TariffDate> {
-    const [result] = await this.knex('tariff_dates')
-      .where('date', date)
-      .update(tariffDate)
-      .returning('*');
-    return result;
-  }
-
-  async deleteTariffDate(date: string): Promise<void> {
-    await this.knex('tariff_dates').where('date', date).delete();
-  }
-
-  // Tariff Warehouses methods
+  // Tariff Warehouses methods (READ ONLY)
   async findAllTariffWarehouses(): Promise<TariffWarehouse[]> {
     return this.knex('tariff_warehouses').select('*');
   }
@@ -123,17 +106,7 @@ export class TariffsService {
     return this.knex('tariff_warehouses').where('tariff_date', date);
   }
 
-  async createTariffWarehouse(tariffWarehouse: TariffWarehouse): Promise<TariffWarehouse> {
-    const [result] = await this.knex('tariff_warehouses').insert(tariffWarehouse).returning('*');
-    return result;
-  }
-
-  async deleteTariffWarehousesByDate(date: string): Promise<void> {
-    await this.knex('tariff_warehouses').where('tariff_date', date).delete();
-  }
-
-  // Wildberries API Integration methods
-  
+  // Helper functions for parsing ugly API data
   /**
    * Parse ugly API string to number (handles comma decimals and '-' as null)
    * Examples: "1,234" -> 1.234, "-" -> null, "0" -> 0
@@ -289,18 +262,6 @@ export class TariffsService {
       this.logger.error(`Failed to sync tariffs from API: ${error.message}`);
       throw error;
     }
-  }
-
-  /**
-   * Sync tariffs for today
-   */
-  async syncTodayTariffs(): Promise<{
-    date: string;
-    warehousesCount: number;
-    isUpdate: boolean;
-  }> {
-    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    return this.syncTariffsFromAPI(today);
   }
 
   /**
