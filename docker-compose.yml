@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: wb-box-postgres
+    environment:
+      - POSTGRES_DB=${PG_DB:-db}
+      - POSTGRES_USER=${PG_USER:-postgres}
+      - POSTGRES_PASSWORD=${PG_PASS:-postgres}
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wb-box-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT:-3000}:${HTTP_PORT:-3000}"
+    environment:
+      - HTTP_PORT=${HTTP_PORT:-3000}
+      - NODE_ENV=production
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_DB=${PG_DB:-db}
+      - PG_USER=${PG_USER:-postgres}
+      - PG_PASS=${PG_PASS:-postgres}
+      - WB_API_TOKEN=${WB_API_TOKEN}
+      - GOOGLE_SPREADSHEETS=${GOOGLE_SPREADSHEETS}
+      - GOOGLE_SERVICE_ACCOUNT_KEYFILE=/app/keys/${GOOGLE_SERVICE_ACCOUNT_KEYFILE:-key.json}
+      - EXPORT_DECIMAL_SEPARATOR=${EXPORT_DECIMAL_SEPARATOR:-','}
+      - EXPORT_SORTING_COLUMN=${EXPORT_SORTING_COLUMN:-boxDeliveryCoefExpr}
+      - EXPORT_SORTING_ASC=${EXPORT_SORTING_ASC:-1}
+      - SCHEDULER_ENABLED=${SCHEDULER_ENABLED:-1}
+    volumes:
+      - ./keys:/app/keys:ro
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
